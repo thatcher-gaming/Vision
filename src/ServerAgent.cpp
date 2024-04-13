@@ -386,6 +386,9 @@ status_t ServerAgent::SocketThread()
 
 			fSocket = serverSock;
 
+			dataSend.ReplaceString("data", "CAP LS 302");
+			if (sMsgrE->SendMessage(&dataSend) != B_OK) throw failToLock();
+
 			if (strlen(serverData->password) > 0) {
 				ClientAgent::PackDisplay(&statMsg, B_TRANSLATE("[@] Sending password\n"), C_ERROR);
 				sMsgrE->SendMessage(&statMsg);

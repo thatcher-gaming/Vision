@@ -35,6 +35,8 @@
 #include "WindowList.h"
 
 #include <stdio.h>
+#include <string>
+#include <unordered_map>
 
 /* #6502 was here --
 <kurros> regurg, amiyumi?
@@ -49,6 +51,17 @@
 
 bool ServerAgent::ParseEvents(const char* data)
 {
+	// parse tags if the line has them 
+	std::unordered_map<std::string, std::string> tags;
+	if (data[0] == '@') {
+		tags = ParseTags(data);
+
+		// remove the tag bit as to not trip anything up
+		BString bdata = data;
+		bdata.Remove(0, bdata.FindFirst(' ') + 1);
+		data = bdata.String();
+	}
+
 	BString firstWord = GetWord(data, 1).ToUpper();
 	BString secondWord = GetWord(data, 2).ToUpper();
 
@@ -522,6 +535,48 @@ bool ServerAgent::ParseEvents(const char* data)
 		PostActive(&msg);
 
 		return true;
+	}
+
+	if (secondWord == "CAP") {
+		BString fourthWord = GetWord(data, 4).ToUpper();
+		BString fifthWord = GetWord(data, 5).ToUpper();
+
+		int32 trimPos = 1;
+		BString caps;
+
+		if (fourthWord == "LS") {
+			bool finished = false;
+
+			if (fifthWord == "*") {
+				// server isn't done listing caps
+				caps = RestOfString(data, 6);
+			} else {
+				caps = RestOfString(data, 5);
+				finished = true;
+			}
+
+			// remove the colon prefix
+			caps.RemoveFirst(":");
+
+			// do the thing
+			NegotiateCaps(caps);
+
+			if (finished) SendData("CAP END");
+		}
+
+		if (fourthWord == "ACK") {
+			caps = RestOfString(data, 5);
+			CapsAcked(caps);
+
+			if (vision_app->fDebugSend) {
+				BString msg;
+				msg += "AVAILABLE CAPS: ";
+				for (const auto& [k, v] : fAvailableCaps) {
+					msg += (k + " ").c_str();
+				}
+				printf("%s\n", msg.String());
+			}
+		}
 	}
 
 	// ship off to parse numerics

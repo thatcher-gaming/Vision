@@ -27,6 +27,8 @@
 #define _SERVERAGENT_H_
 
 #include <map>
+#include <unordered_map>
+#include <string>
 
 #include <Rect.h>
 #include <String.h>
@@ -77,8 +79,11 @@ private:
 	void ParseLine(const char*);
 	bool ParseEvents(const char*);
 	bool ParseENums(const char*, const char*);
+    std::unordered_map<std::string, std::string> ParseTags(const char*);
 	void ParseCTCP(BString, BString, BString);
 	void ParseCTCPResponse(BString, BString);
+	void NegotiateCaps(BString);
+	void CapsAcked(BString);
 
 	static int SortNotifyItems(const NotifyListItem*, const NotifyListItem*);
 
@@ -167,6 +172,7 @@ private:
 	sem_id fSendSyncSem; // synchronization semaphore for data sends
 	ServerData fCurrentServer;
 	std::map<BString, BString> fRemoteAwayMessages;
+	std::unordered_map<std::string, std::string> fAvailableCaps;
 };
 
 #endif

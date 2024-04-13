@@ -55,10 +55,12 @@ SRCS = \
 	NetworkWindow.cpp \
 	NotifyList.cpp \
 	NumericFilter.cpp \
+	NegotiateCaps.cpp \
 	ParseCmd.cpp \
 	ParseCTCP.cpp \
 	ParseENums.cpp \
 	ParseEvents.cpp \
+	ParseTags.cpp \
 	PlayButton.cpp \
 	PrefAliases.cpp \
 	PrefApp.cpp \
